@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TrelloKlient.Tests/TrelloKlient.Tests.csproj" />
+  <Project Path="TrelloKlient/TrelloKlient.csproj" />
+</Solution>
