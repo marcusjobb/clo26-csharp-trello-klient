@@ -39,6 +39,8 @@ dotnet test
 | Fil | Vad |
 |---|---|
 | `docs/planeringsprompt.md` | Mall-prompt för att låta en AI planera ett projekt i små tasks med bra beskrivningar, inklusive hur man kopplar AI:n till Trello/GitHub |
+| `docs/miniprompt.md` | Kort, generisk prompt: beskriv projektet i tre rader, få uppgifter med ordning och tid, granska förslaget |
+| `docs/miniprompt-labyrintspel.md` | Samma miniprompt, ifylld för labyrintspelet |
 | `tools/seed_board.py` | Skapar spel-tasks som kort på boarden (`python tools/seed_board.py TrelloKlient/secrets.json`) |
 | `tools/descriptions.py` | Fyller korten med utförliga beskrivningar och kodexempel |
 
