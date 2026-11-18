@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Miniprompt – Promptplanner</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="./">← Alla promptar</a>
+    <h1>Miniprompt: dela upp ett projekt</h1>
+    <p class="lead">Beskriv projektet med tre rader. Du får en prompt som ber AI:n om uppgifter i ordning med tidsåtgång.</p>
+
+    <form id="form" novalidate>
+      <div id="fields"></div>
+      <div class="actions">
+        <button type="submit" class="primary">Generera och kopiera</button>
+        <button type="button" id="example">Fyll i exempel</button>
+        <button type="button" id="reset">Rensa</button>
+      </div>
+    </form>
+
+    <section id="result" hidden>
+      <h2>Din prompt</h2>
+      <p id="status" role="status" aria-live="polite"></p>
+      <textarea id="output" readonly aria-label="Färdig prompt"></textarea>
+      <div class="actions"><button type="button" id="copyAgain">Kopiera igen</button></div>
+    </section>
+
+    <section class="box">
+      <h2>Granska förslaget innan du använder det</h2>
+      <p>Gå igenom AI:ns tabell rad för rad:</p>
+      <ul>
+        <li><strong>Kan jag förklara uppgiften med egna ord?</strong> Om inte: ta bort den, eller fråga läraren vad den betyder.</li>
+        <li><strong>Är den för stor?</strong> Tar den längre tid än gränsen, eller innehåller den flera "och": skriv om den till flera mindre uppgifter.</li>
+        <li><strong>Är ordningen rimlig?</strong> Kan jag göra uppgift 5 utan att 1–4 är klara?</li>
+        <li><strong>Leder den mot "klart när"?</strong> Uppgifter som inte hjälper till dit kan vänta.</li>
+      </ul>
+      <p>Det är <strong>din</strong> lista när du är klar, inte AI:ns.</p>
+    </section>
+  </main>
+
+  <script src="assets/generator.js"></script>
+  <script>
+    createGenerator({
+      fields: [
+        {
+          id: "what", type: "textarea", rows: 2, required: true,
+          label: "Vad appen gör",
+          hint: "En mening: vad gör appen, och för vem?",
+          placeholder: "t.ex. En bokningsapp där kunder bokar tid för däckbyte"
+        },
+        {
+          id: "done", type: "textarea", rows: 2, required: true,
+          label: "Klart när",
+          hint: "Vad kan användaren göra när appen är färdig? Konkret och kontrollerbart.",
+          placeholder: "t.ex. Man kan se lediga tider, boka en tid och avboka den"
+        },
+        {
+          id: "parts", type: "textarea", rows: 2, required: true,
+          label: "Delar",
+          hint: "Vilka delar består appen av? Sidor, klasser, databas, API …",
+          placeholder: "t.ex. Kalender, bokning, kunder, databas"
+        },
+        {
+          id: "tech", type: "text",
+          label: "Språk/teknik du är nybörjare i",
+          default: "C#"
+        },
+        {
+          id: "maxTime", type: "select",
+          label: "Hur stor får en uppgift vara?",
+          default: "30 minuter",
+          options: [
+            { value: "15 minuter", label: "Högst 15 minuter" },
+            { value: "30 minuter", label: "Högst 30 minuter" },
+            { value: "1 timme", label: "Högst 1 timme" }
+          ]
+        }
+      ],
+
+      build: (v) => lines(
+        "Jag ska bygga ett projekt och vill ha hjälp att dela upp det i uppgifter.",
+        "",
+        `Vad appen gör: ${v.what}`,
+        `Klart när: ${v.done}`,
+        `Delar: ${v.parts}`,
+        "",
+        `Dela upp projektet i små uppgifter som var och en tar högst ${v.maxTime}.`,
+        "Sätt dem i den ordning de bör göras och ge en grov tidsåtgång per uppgift.",
+        "Svara med en tabell: Nr | Uppgift | Tid.",
+        `Jag är nybörjare i ${v.tech || "programmering"}, så håll uppgifterna små och konkreta.`
+      ),
+
+      example: {
+        what: "Ett konsolspel i C# där spelaren springer runt i en labyrint, äter prickar och jagas av monster – Pac-Man-känsla, ingen grafik, inga vapen.",
+        done: "Man kan styra med piltangenterna, vinner när alla prickar är uppätna och förlorar om ett monster tar en – och labyrint, rörelse och monster har tester.",
+        parts: "Labyrint (Maze), spelare (Player), monster (Monster), utskrift (Renderer), tangentbord (InputHandler) och spelloop (Game).",
+        tech: "C#",
+        maxTime: "30 minuter"
+      }
+    });
+  </script>
+</body>
+</html>

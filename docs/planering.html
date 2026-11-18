@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projektplanering – Promptplanner</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="./">← Alla promptar</a>
+    <h1>Projektplanering med beskrivningar</h1>
+    <p class="lead">Få en plan där varje task har mål, kodexempel, förklaringar och "klart när". AI:n visar först bara kortnamnen, så att du kan godkänna upplägget.</p>
+
+    <details class="box">
+      <summary>Ska AI:n skapa korten åt dig? Läs det här först</summary>
+      <ul>
+        <li><strong>AI-agent på din dator</strong> (Claude Code, Copilot agent …): Trello kräver API-nyckel + <em>token</em>. Token är den blå länken "Token" på Trellos API-key-sida, inte "Secret". Lägg dem i en gitignorerad <code>secrets.json</code>. För GitHub: kör <code>gh auth login</code>.</li>
+        <li><strong>Webb-AI</strong> (claude.ai, ChatGPT …): koppla Trello eller GitHub under inställningarna (Connectors / Integrationer / Appar).</li>
+        <li><strong>Ingen koppling?</strong> Välj "bara text" nedan och klistra in korten själv.</li>
+        <li>Klistra aldrig in nycklar i chatten. Har det hänt: generera nya.</li>
+      </ul>
+      <p><a href="https://github.com/marcusjobb/clo26-csharp-trello-klient/blob/main/docs/planeringsprompt.md">Utförlig instruktion på GitHub</a></p>
+    </details>
+
+    <form id="form" novalidate>
+      <div id="fields"></div>
+      <div class="actions">
+        <button type="submit" class="primary">Generera och kopiera</button>
+        <button type="button" id="example">Fyll i exempel</button>
+        <button type="button" id="reset">Rensa</button>
+      </div>
+    </form>
+
+    <section id="result" hidden>
+      <h2>Din prompt</h2>
+      <p id="status" role="status" aria-live="polite"></p>
+      <textarea id="output" readonly aria-label="Färdig prompt"></textarea>
+      <div class="actions"><button type="button" id="copyAgain">Kopiera igen</button></div>
+    </section>
+  </main>
+
+  <script src="assets/generator.js"></script>
+  <script>
+    // Var korten ska hamna: texten i prompten + formatet beskrivningarna ska ha.
+    const DESTINATIONS = {
+      trello:    { text: (n) => `Trello-boarden "${n || "NAMN"}" via API-nyckel och token i \`secrets.json\``, format: "Trello" },
+      github:    { text: (n) => `GitHub Issues i repot "${n || "ägare/repo"}" via \`gh\``, format: "GitHub Issues" },
+      azure:     { text: (n) => `Azure DevOps-projektet "${n || "NAMN"}"`, format: "Azure DevOps" },
+      connector: { text: (n) => `via kopplad connector${n ? ` (${n})` : ""}`, format: "Trello eller GitHub" },
+      text:      { text: () => "ingen koppling – ge mig bara text", format: null }
+    };
+
+    createGenerator({
+      fields: [
+        {
+          id: "what", type: "textarea", rows: 3, required: true,
+          label: "Vad ska byggas",
+          placeholder: "t.ex. ett enkelt konsolspel i C# där man springer i en labyrint och jagas av monster, Pac-Man-känsla, ingen grafik, inga vapen"
+        },
+        { id: "tech", type: "text", label: "Språk/teknik", placeholder: "t.ex. C#, .NET, xUnit, Git/GitHub" },
+        {
+          id: "who", type: "text", label: "Vilka som ska göra det",
+          hint: "Vad kan de redan? Då anpassas nivån på kodexemplen.",
+          placeholder: "t.ex. studenter termin 1 som kan variabler, loopar, metoder och enkla klasser"
+        },
+        { id: "time", type: "text", label: "Ungefärlig tid", placeholder: "t.ex. 2 veckor, grupper om 3" },
+        { id: "must", type: "textarea", rows: 2, label: "Måste finnas / får inte finnas", placeholder: "t.ex. tester ska finnas, inga externa paket" },
+        { id: "database", type: "text", label: "Databas", placeholder: "t.ex. Nej – eller Ja, SQL Server med EF Core" },
+        { id: "patterns", type: "text", label: "Designmönster", placeholder: "t.ex. Factory, Observer – eller inget särskilt" },
+        { id: "gitflow", type: "text", label: "Git flow", default: "main, dev, feature branches och pull requests (ska uppmuntras)" },
+        { id: "taskSize", type: "text", label: "Hur stor får en task vara?", default: "15–60 minuter" },
+        {
+          id: "destination", type: "select", label: "Var ska korten hamna?", default: "text",
+          options: [
+            { value: "text", label: "Ingen koppling – bara text" },
+            { value: "trello", label: "Trello (API-nyckel + token)" },
+            { value: "github", label: "GitHub Issues (gh)" },
+            { value: "azure", label: "Azure DevOps" },
+            { value: "connector", label: "Kopplad connector i webb-AI:n" }
+          ]
+        },
+        {
+          id: "destName", type: "text", label: "Namn på board/repo/projekt",
+          hint: "Behövs inte om du valt \"bara text\".",
+          placeholder: "t.ex. Planering av spel – eller marcusjobb/mazegame"
+        },
+        {
+          id: "rules", type: "textarea", rows: 4, label: "Designregler att hålla genom hela planen",
+          hint: "En regel per rad.",
+          placeholder: "t.ex. Bara klassen Renderer får skriva till konsolen, så att logiken går att testa.\nLogik som ska testas tar in sina beroenden som parametrar, t.ex. Random."
+        }
+      ],
+
+      build: (v) => {
+        const dest = DESTINATIONS[v.destination];
+        return lines(
+          "Jag vill planera ett programmeringsprojekt som ska delas upp i små tasks (t.ex. Trello-kort).",
+          "",
+          "## Projektet",
+          item("Vad ska byggas", v.what),
+          item("Språk/teknik", v.tech),
+          item("Vilka som ska göra det", v.who),
+          item("Ungefärlig tid", v.time),
+          item("Måste finnas / får inte finnas", v.must),
+          item("Git flow", v.gitflow),
+          item("Var korten ska hamna", dest.text(v.destName)),
+          item("Databas", v.database),
+          item("Designmönster", v.patterns),
+          "",
+          "## Hur tasks ska delas upp",
+          `- Varje task ska vara **ett litet, överkomligt steg** på ${v.taskSize || "15–60 minuter"}: skapa repo, skapa en klass, skriva en metod, skriva ett test.`,
+          "- Börja med setup (repo, .gitignore, projekt, testprojekt, backlog).",
+          "- Bygg sedan i **vertikala slices**, så att programmet kan köras och visa något nytt efter varje grupp av tasks.",
+          "- Lägg ett **test-kort** direkt efter den logik det testar, inte samlat i slutet.",
+          "- Lägg det som är \"kul men inte nödvändigt\" sist i en egen grupp (finputs).",
+          "- Numrera korten i den ordning de bör göras: `01. [Grupp] Titel`.",
+          "- Sortera tasken efter svårighet och tidskrav.",
+          "",
+          "## Varje task ska ha en beskrivning med",
+          "1. **Mål:** en mening om varför tasken finns.",
+          "2. **Kodexempel** (inte facit) som faktiskt kompilerar och bygger vidare på de tidigare korten (samma klassnamn, metodnamn och designval genom hela kedjan).",
+          "3. **Förklaring av det svåra:** ett \"Varför?\" eller \"Se upp:\" när något är nytt eller lätt att göra fel.",
+          "4. **Klart när:** 1–3 konkreta, kontrollerbara punkter.",
+          "",
+          v.rules ? "## Designregler att hålla genom hela planen" : null,
+          v.rules ? bullets(v.rules) : null,
+          v.rules ? "" : null,
+          "## Leverans",
+          "Ge mig först **bara listan med kortnamn**, grupperad, så att jag kan godkänna upplägget. När jag har sagt OK, skriv beskrivningarna.",
+          "",
+          dest.format ? `Formatet ska vara markdown som fungerar i ${dest.format}.` : "Formatet ska vara markdown."
+        );
+      },
+
+      example: {
+        what: "Ett enkelt konsolspel i C# där man springer runt i en labyrint och jagas av monster. Pac-Man-känsla, ingen grafik, inga vapen.",
+        tech: "C#, .NET, xUnit, Git/GitHub",
+        who: "Studenter termin 1 som kan variabler, loopar, metoder och enkla klasser",
+        time: "2 veckor, grupper om 3",
+        must: "Tester ska finnas, inga externa paket",
+        database: "Nej",
+        patterns: "Inget särskilt",
+        gitflow: "main, dev, feature branches och pull requests (ska uppmuntras)",
+        taskSize: "15–60 minuter",
+        destination: "trello",
+        destName: "Planering av spel",
+        rules: "Bara klassen Renderer får skriva till konsolen, så att logiken går att testa.\nLogik som ska testas tar in sina beroenden som parametrar, t.ex. Random."
+      }
+    });
+  </script>
+</body>
+</html>

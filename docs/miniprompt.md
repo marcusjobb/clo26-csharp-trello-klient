@@ -17,7 +17,7 @@ Vad appen gör: [en mening]
 Klart när: [vad användaren kan göra när appen är färdig]
 Delar: [appens delar]
 
-Dela upp projektet i små uppgifter som var och en tar högst 1 timme.
+Dela upp projektet i små uppgifter som var och en tar högst 30 minuter.
 Sätt dem i den ordning de bör göras och ge en grov tidsåtgång per uppgift.
 Svara med en tabell: Nr | Uppgift | Tid.
 Jag är nybörjare i [språk/teknik], så håll uppgifterna små och konkreta.

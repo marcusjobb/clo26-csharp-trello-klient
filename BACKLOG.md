@@ -7,6 +7,8 @@
 
 - [x] Pedagogiska kommentarer för CLO26 + utskrift utbruten till TaskTable (en klass = ett ansvar)
 
+- [x] Promptplanner på GitHub Pages: startsida + 3 generatorer (miniprompt, projektplanering, bästa praxis enligt Anthropic). Testad i Node (mallar) och headless Edge (formulär, validering, kopiering, mobilbredd)
+
 ## Att göra
 - [ ] Radera Trello-appen "jsonimport" och generera nya nycklar (de gamla har synts i en chatt)
 
@@ -16,3 +18,6 @@
 
 ## Öppna frågor
 - Ska arkiverade kort visas? (Just nu: Trellos standard = bara öppna kort.)
+
+## Idéer (sist i kön)
+- Akronym-generatorer för AI-kursen (RTF, CO-STAR, CREATE m.fl., se https://teachandlearnai.com/uncategorized/acronyms-for-ai-prompts/). Återanvänd generator.js. Öppen fråga: eget repo för AI-kursen i stället för detta CLO26-repo?

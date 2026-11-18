@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generell prompt – Promptplanner</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="./">← Alla promptar</a>
+    <h1>Generell prompt enligt bästa praxis</h1>
+    <p class="lead">För vilken uppgift som helst. Bara uppgiften är obligatorisk, men ju fler rutor du fyller i, desto bättre svar brukar du få.</p>
+
+    <form id="form" novalidate>
+      <div id="fields"></div>
+      <div class="actions">
+        <button type="submit" class="primary">Generera och kopiera</button>
+        <button type="button" id="example">Fyll i exempel</button>
+        <button type="button" id="reset">Rensa</button>
+      </div>
+    </form>
+
+    <section id="result" hidden>
+      <h2>Din prompt</h2>
+      <p id="status" role="status" aria-live="polite"></p>
+      <textarea id="output" readonly aria-label="Färdig prompt"></textarea>
+      <div class="actions"><button type="button" id="copyAgain">Kopiera igen</button></div>
+    </section>
+
+    <section class="box">
+      <h2>Varför de här rutorna?</h2>
+      <ul>
+        <li><strong>Var tydlig:</strong> börja med ett verb och säg exakt vad du vill ha. AI:n gissar inte vad du menar.</li>
+        <li><strong>Ge sammanhang:</strong> berätta <em>varför</em> och för vem. Då kan AI:n fatta bättre beslut även om sådant du inte nämnt.</li>
+        <li><strong>Var specifik:</strong> längd, nivå, begränsningar och struktur.</li>
+        <li><strong>Visa ett exempel</strong> i stället för att beskriva. Börja med ett och lägg till fler bara om det behövs.</li>
+        <li><strong>Beskriv formen du vill ha,</strong> inte det du vill slippa: "skriv i löpande stycken" fungerar bättre än "använd inga punktlistor".</li>
+        <li><strong>Tillåt osäkerhet:</strong> låt AI:n säga "det vet jag inte" i stället för att hitta på.</li>
+        <li><strong>En sak i taget:</strong> är uppgiften stor, dela upp den i flera prompter där svaret från en blir underlag till nästa.</li>
+      </ul>
+      <p>Källa: <a href="https://claude.com/resources/articles/best-practices-for-prompt-engineering">Best practices for prompt engineering</a> (Anthropic)</p>
+    </section>
+  </main>
+
+  <script src="assets/generator.js"></script>
+  <script>
+    createGenerator({
+      fields: [
+        {
+          id: "task", type: "textarea", rows: 3, required: true,
+          label: "Uppgift",
+          hint: "Börja med ett verb. Vad ska AI:n göra, och vad ska svaret innehålla?",
+          placeholder: "t.ex. Förklara skillnaden mellan en class och en record i C#, med ett kodexempel för varje."
+        },
+        {
+          id: "context", type: "textarea", rows: 3,
+          label: "Sammanhang: varför och för vem?",
+          hint: "Vem är svaret till, vad ska det användas till och vilket problem löser det?",
+          placeholder: "t.ex. Jag pluggar inför ett prov och förstår inte när man ska välja vilken."
+        },
+        {
+          id: "requirements", type: "textarea", rows: 3,
+          label: "Krav och begränsningar",
+          hint: "En per rad: längd, nivå, tid, teknik, budget …",
+          placeholder: "t.ex. Max en halv A4-sida\nAnpassa för nybörjare\nAnvänd .NET 10"
+        },
+        {
+          id: "format", type: "textarea", rows: 2,
+          label: "Hur ska svaret se ut?",
+          hint: "Beskriv det du vill ha, inte det du vill slippa. Tabell, lista, löpande text, kod …",
+          placeholder: "t.ex. Löpande text med en kort jämförelsetabell på slutet."
+        },
+        {
+          id: "example", type: "textarea", rows: 4,
+          label: "Exempel på hur det ska se ut (valfritt)",
+          hint: "Ett exempel säger mer än en lång beskrivning."
+        },
+        {
+          id: "material", type: "textarea", rows: 5,
+          label: "Underlag (valfritt)",
+          hint: "Text, kod eller data som AI:n ska utgå från. Långt underlag hamnar sist i prompten."
+        },
+        {
+          id: "role", type: "text",
+          label: "Roll (valfritt)",
+          hint: "Håll den enkel. Bra för ton och perspektiv, men behövs oftast inte.",
+          placeholder: "t.ex. en tålmodig lärare i C#"
+        },
+        { id: "stepByStep", type: "checkbox", label: "Be AI:n tänka steg för steg innan den svarar (bra för svåra problem)" },
+        { id: "uncertainty", type: "checkbox", label: "Låt AI:n säga till om den inte vet, i stället för att gissa", default: true }
+      ],
+
+      build: (v) => lines(
+        v.role ? `Du är ${v.role}.\n` : null,
+        v.task,
+        "",
+        block("Sammanhang:", v.context),
+        block("Krav:", v.requirements && bullets(v.requirements)),
+        block("Svaret ska se ut så här:", v.format),
+        block("Här är ett exempel på stilen jag vill ha:", v.example),
+        block("Underlag:", v.material),
+        v.material ? "Utför uppgiften ovan utifrån underlaget.\n" : null,
+        v.stepByStep ? "Tänk steg för steg innan du svarar." : null,
+        v.uncertainty
+          ? (v.material
+              ? "Om underlaget inte räcker eller om du är osäker, säg det i stället för att gissa."
+              : "Om du saknar information eller är osäker, säg det i stället för att gissa.")
+          : null
+      ),
+
+      example: {
+        task: "Förklara skillnaden mellan en class och en record i C#, och ge ett kort kodexempel för varje.",
+        context: "Jag är student i termin 1 och pluggar inför ett prov. Jag förstår inte när man ska välja vilken.",
+        requirements: "Max en halv A4-sida\nAnpassa för nybörjare\nAnvänd .NET 10",
+        format: "Löpande text, kodexemplen i kodblock och en kort jämförelsetabell på slutet.",
+        example: "",
+        material: "",
+        role: "en tålmodig lärare i C#",
+        stepByStep: false,
+        uncertainty: true
+      }
+    });
+  </script>
+</body>
+</html>
