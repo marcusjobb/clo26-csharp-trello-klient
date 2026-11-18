@@ -39,6 +39,9 @@ dotnet test
 | Fil | Vad |
 |---|---|
 | `docs/planeringsprompt.md` | Mall-prompt för att låta en AI planera ett projekt i små tasks med bra beskrivningar, inklusive hur man kopplar AI:n till Trello/GitHub |
+| `docs/index.html` m.fl. | **CLO26 Promptplanner** på GitHub Pages: https://marcusjobb.github.io/clo26-csharp-trello-klient/ |
+| `docs/assets/kursprompter.js` | Kursens prompter som data (förklara uppgift, gör kort, dela upp kort, fastnat, förklara kod, granska uppdelning, UML). Visas via `kurs.html?id=…` |
+| `tests-web/test_kursprompter.js` | Tester för kursprompterna: `node tests-web/test_kursprompter.js` |
 | `docs/miniprompt.md` | Kort, generisk prompt: beskriv projektet i tre rader, få uppgifter med ordning och tid, granska förslaget |
 | `docs/miniprompt-labyrintspel.md` | Samma miniprompt, ifylld för labyrintspelet |
 | `tools/seed_board.py` | Skapar spel-tasks som kort på boarden (`python tools/seed_board.py TrelloKlient/secrets.json`) |

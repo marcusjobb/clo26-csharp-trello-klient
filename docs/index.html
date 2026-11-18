@@ -3,41 +3,83 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Promptplanner</title>
-  <meta name="description" content="Fyll i några rutor och få en färdig prompt att klistra in i din AI.">
+  <title>CLO26 Promptplanner</title>
+  <meta name="description" content="Kursens prompter som ifyllnadsmallar – fyll i rutorna och få en färdig prompt.">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
   <main class="wrap">
-    <h1>Promptplanner</h1>
-    <p class="lead">Fyll i några rutor och få en färdig prompt som kopieras direkt. Välj den som passar det du ska göra.</p>
+    <h1>CLO26 Promptplanner</h1>
+    <p class="lead">Prompterna vi använder i kursen. Fyll i rutorna och få en färdig prompt som kopieras direkt.</p>
 
+    <section class="box">
+      <h2>AI är en juniorkollega, inte facit</h2>
+      <p>AI:n kan föreslå, förklara och ge ledtrådar. Du ansvarar för det du lämnar in, och du ska kunna förklara varje kort och varje rad kod. Därför ber prompterna här om <strong>ledtrådar och förklaringar</strong> som standard – inte färdiga lösningar.</p>
+    </section>
+
+    <h2>Planera ett projekt</h2>
+    <p class="muted">Dagens Kanban-lektion: beskriv, dela upp, granska och gör kort.</p>
     <div class="cards">
       <a class="card" href="miniprompt.html">
-        <h2>Miniprompt: dela upp ett projekt</h2>
-        <p>Beskriv projektet med tre rader och få uppgifter med ordning och tidsåtgång. Granska sedan förslaget.</p>
-        <p class="meta">Passar när du ska komma igång med ett nytt projekt · ca 5 minuter</p>
+        <h2>1. Miniprompt: dela upp ett projekt</h2>
+        <p>Beskriv projektet med tre rader och få uppgifter med ordning och tidsåtgång.</p>
+        <p class="meta">Steg 1–2 i övningen AI-planering och Trello</p>
       </a>
-
+      <a class="card" href="kurs.html?id=forklara-uppgift">
+        <h2>2. Förklara en uppgift</h2>
+        <p>Förstår du inte en uppgift i AI:ns lista? Be om en förklaring innan den blir ett kort.</p>
+        <p class="meta">Steg 3: Granska</p>
+      </a>
+      <a class="card" href="kurs.html?id=kanban-kort">
+        <h2>3. Gör kort av listan</h2>
+        <p>Gör om den granskade listan till kort för Trello eller GitHub Issues.</p>
+        <p class="meta">Steg 4–5: Skapa kort</p>
+      </a>
+      <a class="card" href="kurs.html?id=dela-upp-kort">
+        <h2>4. Dela upp ett för stort kort</h2>
+        <p>Kortet har legat i Working för länge? Dela upp det i steg du kan börja på direkt.</p>
+        <p class="meta">Steg 6: Reflektera</p>
+      </a>
       <a class="card" href="planering.html">
-        <h2>Projektplanering med beskrivningar</h2>
-        <p>En utförlig plan där varje task får mål, kodexempel, förklaringar och "klart när". Kan skapa korten direkt i Trello eller GitHub.</p>
-        <p class="meta">Passar för grupparbeten och större projekt · ca 15 minuter</p>
-      </a>
-
-      <a class="card" href="prompt.html">
-        <h2>Generell prompt enligt bästa praxis</h2>
-        <p>För vilken uppgift som helst. Bygger på Anthropics råd: var tydlig, ge sammanhang, var specifik, visa exempel och tillåt osäkerhet.</p>
-        <p class="meta">Passar när du vill ha bättre svar på en enskild fråga eller uppgift</p>
+        <h2>Megaprompt: projektplanering</h2>
+        <p>En utförlig plan där varje task får mål, kodexempel, förklaringar och ”klart när”. Kan skapa korten direkt i Trello eller GitHub.</p>
+        <p class="meta">För grupparbeten och större projekt</p>
       </a>
     </div>
 
-    <p class="lead" style="margin-top:2rem">Fler mallar? <a href="https://marcusjobb.github.io/ai-promptgeneratorer/">Promptgeneratorer</a> har ifyllnadsmallar för 22 promptakronymer (RISEN, CO-STAR, KÖTTBULLAR …) och 8 prompttekniker.</p>
+    <h2>När du kodar</h2>
+    <p class="muted">Fastnat, ny kod eller dags att granska?</p>
+    <div class="cards" id="koda"></div>
+
+    <h2>Allmänt</h2>
+    <div class="cards">
+      <a class="card" href="prompt.html">
+        <h2>Generell prompt enligt bästa praxis</h2>
+        <p>För vilken uppgift som helst: var tydlig, ge sammanhang, var specifik, visa exempel och tillåt osäkerhet.</p>
+      </a>
+    </div>
+
+    <p class="lead" style="margin-top:2rem">Fler mallar? <a href="https://marcusjobb.github.io/ai-promptgeneratorer/">Promptgeneratorer</a> har ifyllnadsmallar för 22 promptakronymer, 9 tekniker och modellanpassade prompter för Claude, GPT och Gemini.</p>
 
     <footer>
-      Prompterna finns också som text i
-      <a href="https://github.com/marcusjobb/clo26-csharp-trello-klient/tree/main/docs">repot på GitHub</a>.
+      Kursmaterialet finns på <a href="https://github.com/marcusjobb/YRGO-CLO26-HT26Kursmaterial">GitHub</a>.
+      Prompterna finns också som text i <a href="https://github.com/marcusjobb/clo26-csharp-trello-klient/tree/main/docs">det här repot</a>.
     </footer>
   </main>
+
+  <script src="assets/kursprompter.js"></script>
+  <script>
+    // Korten under "När du kodar" byggs från kursprompter.js
+    for (const p of COURSE_PROMPTS.filter((x) => x.group === "koda")) {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = `kurs.html?id=${p.id}`;
+      a.innerHTML = "<h2></h2><p></p><p class='meta'></p>";
+      a.querySelector("h2").textContent = p.title;
+      a.querySelector("p").textContent = p.tagline;
+      a.querySelector(".meta").textContent = p.source.name;
+      document.getElementById("koda").appendChild(a);
+    }
+  </script>
 </body>
 </html>

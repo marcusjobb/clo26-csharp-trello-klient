@@ -5,6 +5,8 @@
  *   fields  – lista med fält som ska visas i formuläret
  *   build   – funktion som får alla värden och returnerar den färdiga prompten
  *   example – (valfritt) värden som fylls i av knappen "Fyll i exempel"
+ *   storageKey – (valfritt) egen nyckel för sparade värden, när flera generatorer delar samma sida
+ *   texts   – (valfritt) egna texter för statusmeddelanden, t.ex. på göteborgska
  *
  * Fälttyper: "text", "textarea", "select" (med options) och "checkbox".
  */
@@ -16,7 +18,14 @@ function createGenerator(config) {
   const status = document.getElementById("status");
 
   // Varje sida sparar sina egna värden i webbläsaren, så att inget försvinner vid omladdning.
-  const storageKey = "promptplanner:" + location.pathname;
+  const storageKey = "promptplanner:" + (config.storageKey ?? location.pathname);
+
+  const texts = {
+    missing: "Fyll i: ",
+    copied: "✓ Kopierad! Klistra in den i din AI.",
+    copyFailed: "Kunde inte kopiera automatiskt – texten är markerad, tryck Ctrl+C.",
+    ...config.texts
+  };
 
   // ---------- Rita formuläret ----------
   const saved = loadSaved();
@@ -105,7 +114,7 @@ function createGenerator(config) {
     if (missing.length > 0) {
       result.hidden = false;
       output.value = "";
-      setStatus("Fyll i: " + missing.map((f) => f.label).join(", "), "error");
+      setStatus(texts.missing + missing.map((f) => f.label).join(", "), "error");
       document.getElementById(missing[0].id).focus();
       return;
     }
@@ -137,12 +146,12 @@ function createGenerator(config) {
   async function copyPrompt() {
     try {
       await navigator.clipboard.writeText(output.value);
-      setStatus("✓ Kopierad! Klistra in den i din AI.", "ok");
+      setStatus(texts.copied, "ok");
     } catch {
       // Reserv om webbläsaren inte tillåter urklipp: markera texten så att man kan trycka Ctrl+C.
       output.focus();
       output.select();
-      setStatus("Kunde inte kopiera automatiskt – texten är markerad, tryck Ctrl+C.", "error");
+      setStatus(texts.copyFailed, "error");
     }
   }
 

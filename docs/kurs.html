@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLO26-prompt</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="./">← Alla CLO26-prompter</a>
+    <h1 id="title">CLO26-prompt</h1>
+    <p class="lead" id="lead"></p>
+
+    <form id="form" novalidate>
+      <div id="fields"></div>
+      <div class="actions">
+        <button type="submit" class="primary">Generera och kopiera</button>
+        <button type="button" id="example">Fyll i exempel</button>
+        <button type="button" id="reset">Rensa</button>
+      </div>
+    </form>
+
+    <section id="result" hidden>
+      <h2>Din prompt</h2>
+      <p id="status" role="status" aria-live="polite"></p>
+      <textarea id="output" readonly aria-label="Färdig prompt"></textarea>
+      <div class="actions"><button type="button" id="copyAgain">Kopiera igen</button></div>
+    </section>
+
+    <section class="box" id="tipsBox" hidden>
+      <h2>Tänk på</h2>
+      <ul id="tips"></ul>
+      <p class="source" id="source"></p>
+    </section>
+  </main>
+
+  <script src="assets/generator.js"></script>
+  <script src="assets/kursprompter.js"></script>
+  <script>
+    // Vilken prompt? Läses från adressen: kurs.html?id=fastnat
+    const prompt = findCoursePrompt(new URLSearchParams(location.search).get("id"));
+    const $ = (id) => document.getElementById(id);
+
+    if (!prompt) {
+      $("title").textContent = "Hittade ingen prompt";
+      $("lead").innerHTML = 'Gå tillbaka till <a href="./">startsidan</a> och välj en.';
+      $("form").hidden = true;
+    } else {
+      document.title = `${prompt.title} – CLO26`;
+      $("title").textContent = prompt.title;
+      $("lead").textContent = prompt.tagline;
+
+      $("tipsBox").hidden = false;
+      for (const tip of prompt.tips) {
+        const li = document.createElement("li");
+        li.textContent = tip;
+        $("tips").appendChild(li);
+      }
+      const link = document.createElement("a");
+      link.href = COURSE_REPO + prompt.source.path;
+      link.textContent = prompt.source.name;
+      $("source").append("Från kursen: ", link);
+
+      createGenerator({
+        fields: prompt.fields,
+        build: prompt.build,
+        example: prompt.example,
+        storageKey: "clo26:" + prompt.id
+      });
+    }
+  </script>
+</body>
+</html>
